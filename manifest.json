@@ -1,0 +1,102 @@
+{
+  "dxt_version": "0.1",
+  "name": "airtable-mcp-server-enhanced",
+  "display_name": "Enhanced Airtable MCP Server",
+  "version": "1.0.0",
+  "description": "Production-ready Airtable MCP server with comprehensive security features, formula injection protection, and support for all field types",
+  "long_description": "A production-ready Model Context Protocol server for Airtable with comprehensive security features including formula injection protection, input validation, credential sanitization, and support for all Airtable field types. Built with Personal Access Token (PAT) authentication, structured logging with Winston, and 23 security-focused tests. Features include intelligent field filtering, automatic type conversion, schema management, and advanced query helpers.",
+  "author": {
+    "name": "Jordan Huffman",
+    "url": "https://github.com/jordanhuffman"
+  },
+  "license": "MIT",
+  "server": {
+    "type": "node",
+    "entry_point": "build/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/build/index.js"
+      ],
+      "env": {
+        "AIRTABLE_PAT": "${user_config.airtable_pat}",
+        "AIRTABLE_BASE_ID": "${user_config.airtable_base_id}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "airtable_list_records",
+      "description": "List records from a table with optional filtering, sorting, and field selection"
+    },
+    {
+      "name": "airtable_get_record",
+      "description": "Get a specific record by ID"
+    },
+    {
+      "name": "airtable_create_record",
+      "description": "Create a new record with automatic field type conversion"
+    },
+    {
+      "name": "airtable_update_record",
+      "description": "Update an existing record with automatic field type conversion"
+    },
+    {
+      "name": "airtable_delete_record",
+      "description": "Delete a record by ID"
+    },
+    {
+      "name": "airtable_set_table_schema",
+      "description": "Define table schema for enhanced type safety and validation"
+    },
+    {
+      "name": "airtable_query_by_age_range",
+      "description": "Query records by age range with automatic formula generation"
+    },
+    {
+      "name": "airtable_query_multiple_select",
+      "description": "Query records by multiple select field values"
+    },
+    {
+      "name": "airtable_smart_query",
+      "description": "Smart query with automatic filter combination and validation"
+    }
+  ],
+  "keywords": [
+    "airtable",
+    "database",
+    "mcp",
+    "security",
+    "production",
+    "pat",
+    "winston",
+    "validation"
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "user_config": {
+    "airtable_pat": {
+      "type": "string",
+      "title": "Airtable Personal Access Token",
+      "description": "Your Airtable Personal Access Token (starts with 'pat'). Create one at https://airtable.com/create/tokens with scopes: data.records:read, data.records:write, schema.bases:read",
+      "required": true,
+      "sensitive": true
+    },
+    "airtable_base_id": {
+      "type": "string",
+      "title": "Default Base ID (Optional)",
+      "description": "Optional default base ID (starts with 'app'). Find it in your Airtable URL. If not set, the PAT can access multiple bases.",
+      "required": false,
+      "sensitive": false
+    }
+  }
+}

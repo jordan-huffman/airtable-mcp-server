@@ -1,0 +1,52 @@
+# Exclude everything that shouldn't be published to npm
+
+# Environment files with credentials
+.env
+.env.*
+!.env.example
+
+# Source files (we publish compiled code only)
+src/
+tsconfig.json
+
+# Tests
+**/__tests__/
+*.test.ts
+*.test.js
+jest.config.js
+coverage/
+
+# Build artifacts we don't need
+*.tsbuildinfo
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Git
+.git/
+.gitignore
+
+# Documentation that's not needed
+SECURITY_AUDIT_SUMMARY.md
+
+# Test scripts
+test-*.ts
+check-*.ts
+
+# Large bundled file (not needed for npm)
+*.mcpb
+
+# Development settings
+.claude/
