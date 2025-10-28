@@ -26,6 +26,14 @@
   ],
   "author": "Jordan Huffman",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jordan-huffman/airtable-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jordan-huffman/airtable-mcp-server/issues"
+  },
+  "homepage": "https://github.com/jordan-huffman/airtable-mcp-server#readme",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.1",
     "airtable": "^0.12.2",
