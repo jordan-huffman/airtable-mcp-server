@@ -41,9 +41,8 @@ npm-debug.log*
 # Documentation that's not needed
 SECURITY_AUDIT_SUMMARY.md
 
-# Test scripts
-test-*.ts
-check-*.ts
+# Development scripts directory
+scripts/
 
 # Large bundled file (not needed for npm)
 *.mcpb

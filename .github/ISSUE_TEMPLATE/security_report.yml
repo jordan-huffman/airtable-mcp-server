@@ -1,0 +1,127 @@
+name: Security Vulnerability Report
+description: Report a security vulnerability (private disclosure recommended)
+title: "[Security]: "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠️ Security Disclosure Policy
+
+        **For serious security vulnerabilities, please DO NOT use this public issue tracker.**
+
+        Instead, follow the responsible disclosure process in [SECURITY.md](https://github.com/jordan-huffman/airtable-mcp-server/blob/main/SECURITY.md):
+
+        1. Email security details privately to the maintainer
+        2. Wait for acknowledgment before public disclosure
+        3. Allow time for a fix to be developed and released
+
+        **Only use this public form for:**
+        - Minor security improvements
+        - Security-related questions
+        - Non-critical security suggestions
+        - Documentation improvements related to security
+
+        If in doubt, use private disclosure via email.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity Level
+      description: How severe is this security issue?
+      options:
+        - Low - Minor security improvement
+        - Medium - Non-critical vulnerability
+        - High - Requires private disclosure (should not use this form!)
+        - Critical - Requires immediate private disclosure (should not use this form!)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Security Issue Description
+      description: Describe the security concern or vulnerability
+      placeholder: |
+        Describe the security issue...
+        Note: If this is a serious vulnerability, please close this issue and email instead.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Security Category
+      description: What type of security issue is this?
+      options:
+        - Credential Exposure
+        - Input Validation
+        - Formula Injection
+        - Denial of Service (DoS)
+        - Authentication/Authorization
+        - Dependency Vulnerability
+        - Information Disclosure
+        - Security Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential Impact
+      description: What could an attacker achieve with this vulnerability?
+      placeholder: An attacker could...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can this security issue be reproduced? (Only for non-critical issues)
+      placeholder: |
+        1. Configure the server with...
+        2. Send a request with...
+        3. Observe that...
+    validations:
+      required: false
+
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Suggested Mitigation
+      description: Do you have suggestions for fixing this issue?
+      placeholder: This could be fixed by...
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Affected Version(s)
+      description: Which versions are affected by this issue?
+      placeholder: e.g., 1.0.2 or all versions
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other relevant information
+      placeholder: Additional details...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: disclosure
+    attributes:
+      label: Responsible Disclosure Agreement
+      options:
+        - label: I confirm this is a LOW severity issue appropriate for public discussion
+          required: true
+        - label: I have read SECURITY.md and understand the private disclosure process for critical issues
+          required: true
+        - label: I will not publicly disclose details of critical vulnerabilities before they are patched
+          required: true

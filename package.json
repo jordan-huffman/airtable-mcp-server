@@ -3,9 +3,33 @@
   "version": "1.0.2",
   "description": "Enhanced Airtable MCP Server with support for all field types including single select, dates, formulas, and more",
   "main": "build/index.js",
+  "types": "build/index.d.ts",
   "type": "module",
   "bin": {
     "airtable-mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build/**/*",
+    "!build/**/*.test.*",
+    "!build/__tests__/**",
+    "README.md",
+    "QUICKSTART.md",
+    "EXAMPLES.md",
+    "FIELD_TYPES.md",
+    "SECURITY.md",
+    "LICENSE",
+    ".env.example",
+    "manifest.json"
+  ],
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js",
+      "default": "./build/index.js"
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "tsc",

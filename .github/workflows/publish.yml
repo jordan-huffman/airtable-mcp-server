@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       id-token: write
 
     steps:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
@@ -27,7 +27,6 @@ jobs:
 
       - name: Run tests
         run: npm test
-        continue-on-error: true  # Don't fail if tests aren't set up yet
 
       - name: Build project
         run: npm run build
@@ -37,14 +36,16 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Comment on release
+      - name: Update release with npm link
         uses: actions/github-script@v7
         with:
           script: |
             const release = context.payload.release;
-            github.rest.issues.createComment({
+            const npmLink = `\n\n---\n\n✅ **Published to npm**: https://www.npmjs.com/package/@jordanhuffman/airtable-mcp-server/v/${release.tag_name.replace('v', '')}`;
+
+            await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: release.id,
-              body: `✅ Successfully published version ${release.tag_name} to npm!\n\nView on npm: https://www.npmjs.com/package/@jordanhuffman/airtable-mcp-server`
+              release_id: release.id,
+              body: (release.body || '') + npmLink
             });

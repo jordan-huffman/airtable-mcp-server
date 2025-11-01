@@ -26,13 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linter (if configured)
-        run: npm run lint || echo "No linter configured"
-        continue-on-error: true
-
       - name: Run tests
         run: npm test
-        continue-on-error: true
 
       - name: Build project
         run: npm run build
