@@ -33,6 +33,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "clean": "rm -rf build coverage",
     "dev": "tsx src/index.ts",
     "start": "node build/index.js",
     "prepare": "npm run build",

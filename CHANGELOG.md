@@ -13,7 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub issue templates for bugs, features, and security reports
 - Pull request template
 - Dependabot configuration for automated dependency updates
-- README badges for npm version, CI status, and license
+- README badges for npm version, CI status, test coverage, license, and Node version
+- CodeQL security scanning workflow for automated vulnerability detection
+- Test coverage reporting with Codecov integration
+- npm caching in CI workflow for faster builds
+- npm audit security check in CI workflow
+- `clean` script to remove build artifacts and coverage reports
 
 ### Changed
 - Moved development test scripts to `scripts/` directory for better organization
@@ -22,11 +27,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated GitHub Actions to remove `continue-on-error` from critical steps
 - Updated TypeScript configuration to exclude test files from compilation
 - Removed empty `src/handlers/` directory
+- Enhanced CI workflow with security scanning and coverage reporting
 
 ### Fixed
 - GitHub workflow files no longer included in npm package
 - Test files no longer compiled to build directory
 - CI/CD workflows now properly fail on test failures
+- Publish workflow release comment issue (now updates release body instead)
 
 ## [1.0.2] - 2025-10-31
 

@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/@jordanhuffman%2Fairtable-mcp-server.svg)](https://www.npmjs.com/package/@jordanhuffman/airtable-mcp-server)
 [![CI](https://github.com/jordan-huffman/airtable-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/jordan-huffman/airtable-mcp-server/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/jordan-huffman/airtable-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/jordan-huffman/airtable-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
 
