@@ -1,6 +1,6 @@
 # Enhanced Airtable MCP Server
 
-[![npm version](https://badge.fury.io/js/@jordanhuffman%2Fairtable-mcp-server.svg)](https://www.npmjs.com/package/@jordanhuffman/airtable-mcp-server)
+[![npm version](https://img.shields.io/npm/v/@jordanhuffman/airtable-mcp-server.svg)](https://www.npmjs.com/package/@jordanhuffman/airtable-mcp-server)
 [![CI](https://github.com/jordan-huffman/airtable-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/jordan-huffman/airtable-mcp-server/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/jordan-huffman/airtable-mcp-server/branch/main/graph/badge.svg)](https://codecov.io/gh/jordan-huffman/airtable-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
