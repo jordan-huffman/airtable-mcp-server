@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-10-31
+
 ### Added
 - LICENSE file with MIT license text
 - Comprehensive project documentation (CHANGELOG, CONTRIBUTING)
@@ -28,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated TypeScript configuration to exclude test files from compilation
 - Removed empty `src/handlers/` directory
 - Enhanced CI workflow with security scanning and coverage reporting
+- Updated GitHub Actions dependencies (checkout v5, setup-node v6, github-script v8)
+- Updated @modelcontextprotocol/sdk to 1.20.2
+- Updated @types/node to 24.9.2
 
 ### Fixed
 - GitHub workflow files no longer included in npm package
@@ -108,7 +113,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive input validation
 - Automatic credential redaction in logs and errors
 
-[Unreleased]: https://github.com/jordan-huffman/airtable-mcp-server/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/jordan-huffman/airtable-mcp-server/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/jordan-huffman/airtable-mcp-server/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/jordan-huffman/airtable-mcp-server/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/jordan-huffman/airtable-mcp-server/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/jordan-huffman/airtable-mcp-server/releases/tag/v1.0.0
