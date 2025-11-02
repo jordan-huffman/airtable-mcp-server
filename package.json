@@ -17,6 +17,7 @@
     "EXAMPLES.md",
     "FIELD_TYPES.md",
     "SECURITY.md",
+    "CHANGELOG.md",
     "LICENSE",
     ".env.example",
     "manifest.json"
