@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-11-03
+
+### Added
+- `airtable_list_tables` tool to discover all tables in a base via Metadata API
+- `airtable_get_table_schema` tool to auto-fetch complete table schema from Airtable
+- `airtable_batch_create_records` tool to create up to 10 records in a single request
+- `airtable_batch_update_records` tool to update up to 10 records in a single request
+- `airtable_batch_delete_records` tool to delete up to 10 records in a single request
+- Automatic schema caching when using `getTableSchemaFromAPI()` method
+- Comprehensive validation schemas for all new batch operations
+- CHANGELOG.md to published npm package for version history visibility
+
+### Changed
+- Improved `listTables()` method to use Metadata API and return detailed table information
+- Enhanced README with documentation for all 5 new tools and updated feature list
+- Optimized npm package distribution by excluding .github/ directory and CONTRIBUTING.md
+
+### Performance
+- Batch operations are up to 10x faster than individual operations
+- Reduced API usage by up to 90% for bulk create/update/delete operations
+- Significantly reduced risk of hitting Airtable's 5 requests/second rate limit
+
 ## [1.1.0] - 2025-10-31
 
 ### Added

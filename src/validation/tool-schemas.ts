@@ -262,3 +262,84 @@ export const smartQuerySchema = z.object({
 });
 
 export type SmartQueryInput = z.infer<typeof smartQuerySchema>;
+
+/**
+ * airtable_list_tables
+ */
+export const listTablesSchema = z.object({
+  baseId: baseIdSchema.optional()
+});
+
+export type ListTablesInput = z.infer<typeof listTablesSchema>;
+
+/**
+ * airtable_get_table_schema
+ */
+export const getTableSchemaSchema = z.object({
+  baseId: baseIdSchema.optional(),
+  table: tableNameSchema
+});
+
+export type GetTableSchemaInput = z.infer<typeof getTableSchemaSchema>;
+
+/**
+ * airtable_batch_create_records
+ */
+export const batchCreateRecordsSchema = z.object({
+  baseId: baseIdSchema.optional(),
+  table: tableNameSchema,
+  records: z.array(
+    z.record(
+      fieldNameSchema,
+      z.any()
+    ).refine(
+      (fields) => Object.keys(fields).length > 0,
+      { message: 'Each record must have at least one field' }
+    ).refine(
+      (fields) => Object.keys(fields).length <= MAX_FIELDS,
+      { message: `Too many fields per record (max ${MAX_FIELDS})` }
+    )
+  ).min(1, 'At least one record must be provided')
+    .max(10, 'Airtable API supports a maximum of 10 records per batch create')
+});
+
+export type BatchCreateRecordsInput = z.infer<typeof batchCreateRecordsSchema>;
+
+/**
+ * airtable_batch_update_records
+ */
+export const batchUpdateRecordsSchema = z.object({
+  baseId: baseIdSchema.optional(),
+  table: tableNameSchema,
+  updates: z.array(
+    z.object({
+      id: recordIdSchema,
+      fields: z.record(
+        fieldNameSchema,
+        z.any()
+      ).refine(
+        (fields) => Object.keys(fields).length > 0,
+        { message: 'Each update must have at least one field' }
+      ).refine(
+        (fields) => Object.keys(fields).length <= MAX_FIELDS,
+        { message: `Too many fields per update (max ${MAX_FIELDS})` }
+      )
+    })
+  ).min(1, 'At least one update must be provided')
+    .max(10, 'Airtable API supports a maximum of 10 records per batch update')
+});
+
+export type BatchUpdateRecordsInput = z.infer<typeof batchUpdateRecordsSchema>;
+
+/**
+ * airtable_batch_delete_records
+ */
+export const batchDeleteRecordsSchema = z.object({
+  baseId: baseIdSchema.optional(),
+  table: tableNameSchema,
+  recordIds: z.array(recordIdSchema)
+    .min(1, 'At least one record ID must be provided')
+    .max(10, 'Airtable API supports a maximum of 10 records per batch delete')
+});
+
+export type BatchDeleteRecordsInput = z.infer<typeof batchDeleteRecordsSchema>;

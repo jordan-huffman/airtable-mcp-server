@@ -288,12 +288,203 @@ export class AirtableClient {
   }
 
   /**
-   * List all tables in the base (requires Metadata API)
-   * This is a placeholder - actual implementation would use the Metadata API
+   * List all tables in the base using Metadata API
    */
-  async listTables(): Promise<string[]> {
-    // This would require the Metadata API which needs different authentication
-    // For now, return cached table names
-    return Array.from(this.tableSchemas.keys());
+  async listTables(baseId?: string): Promise<Array<{id: string, name: string, description?: string, primaryFieldId: string}>> {
+    const targetBaseId = baseId || this.config.baseId;
+    if (!targetBaseId) {
+      throw new ConfigurationError('Base ID required. Please use the airtable_list_bases tool to see available bases and get their IDs, then provide the baseId parameter.');
+    }
+
+    const metadataUrl = `https://api.airtable.com/v0/meta/bases/${targetBaseId}/tables`;
+    const response = await fetch(metadataUrl, {
+      headers: {
+        'Authorization': `Bearer ${this.config.apiKey}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch tables: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as any;
+    return data.tables.map((table: any) => ({
+      id: table.id,
+      name: table.name,
+      description: table.description,
+      primaryFieldId: table.primaryFieldId
+    }));
+  }
+
+  /**
+   * Get full table schema from Metadata API (returns complete schema with all field info)
+   */
+  async getTableSchemaFromAPI(tableName: string, baseId?: string): Promise<TableSchema> {
+    const targetBaseId = baseId || this.config.baseId;
+    if (!targetBaseId) {
+      throw new ConfigurationError('Base ID required. Please use the airtable_list_bases tool to see available bases and get their IDs, then provide the baseId parameter.');
+    }
+
+    const metadataUrl = `https://api.airtable.com/v0/meta/bases/${targetBaseId}/tables`;
+    const response = await fetch(metadataUrl, {
+      headers: {
+        'Authorization': `Bearer ${this.config.apiKey}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch table schema: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as any;
+    const table = data.tables.find((t: any) => t.name === tableName);
+
+    if (!table) {
+      throw new Error(`Table "${tableName}" not found in base`);
+    }
+
+    const schema: TableSchema = {
+      id: table.id,
+      name: table.name,
+      fields: table.fields.map((f: any) => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        options: f.options
+      }))
+    };
+
+    // Cache the schema
+    this.tableSchemas.set(tableName, schema);
+    return schema;
+  }
+
+  /**
+   * Batch create records (up to 10 at a time per Airtable's API limit)
+   */
+  async batchCreateRecords(tableName: string, records: RecordFields[], baseId?: string): Promise<AirtableRecord[]> {
+    if (records.length === 0) {
+      return [];
+    }
+
+    if (records.length > 10) {
+      throw new Error('Airtable API supports a maximum of 10 records per batch create request');
+    }
+
+    const schema = await this.getTableSchema(tableName, baseId);
+    const formattedRecords: RecordFields[] = [];
+
+    // Format and validate each record's fields
+    for (const recordFields of records) {
+      const formattedFields: RecordFields = {};
+
+      for (const [fieldName, value] of Object.entries(recordFields)) {
+        const fieldMetadata = schema.fields.find(f => f.name === fieldName);
+
+        if (fieldMetadata) {
+          // Validate value
+          const validation = validateFieldValue(value, fieldMetadata);
+          if (!validation.valid) {
+            throw new Error(`Record validation failed for field "${fieldName}": ${validation.error}`);
+          }
+
+          // Format value
+          formattedFields[fieldName] = formatFieldValue(value, fieldMetadata);
+        } else {
+          // If we don't have metadata, pass through as-is
+          formattedFields[fieldName] = value;
+        }
+      }
+
+      formattedRecords.push(formattedFields);
+    }
+
+    const base = this.getBase(baseId);
+    const createdRecords = await base(tableName).create(
+      formattedRecords.map(fields => ({ fields: fields as FieldSet }))
+    );
+
+    return createdRecords.map(record => ({
+      id: record.id,
+      fields: record.fields as RecordFields,
+      createdTime: record._rawJson.createdTime
+    }));
+  }
+
+  /**
+   * Batch update records (up to 10 at a time per Airtable's API limit)
+   */
+  async batchUpdateRecords(
+    tableName: string,
+    updates: Array<{id: string, fields: RecordFields}>,
+    baseId?: string
+  ): Promise<AirtableRecord[]> {
+    if (updates.length === 0) {
+      return [];
+    }
+
+    if (updates.length > 10) {
+      throw new Error('Airtable API supports a maximum of 10 records per batch update request');
+    }
+
+    const schema = await this.getTableSchema(tableName, baseId);
+    const formattedUpdates: Array<{id: string, fields: RecordFields}> = [];
+
+    // Format and validate each update's fields
+    for (const update of updates) {
+      const formattedFields: RecordFields = {};
+
+      for (const [fieldName, value] of Object.entries(update.fields)) {
+        const fieldMetadata = schema.fields.find(f => f.name === fieldName);
+
+        if (fieldMetadata) {
+          // Validate value
+          const validation = validateFieldValue(value, fieldMetadata);
+          if (!validation.valid) {
+            throw new Error(`Update validation failed for record "${update.id}", field "${fieldName}": ${validation.error}`);
+          }
+
+          // Format value
+          formattedFields[fieldName] = formatFieldValue(value, fieldMetadata);
+        } else {
+          // If we don't have metadata, pass through as-is
+          formattedFields[fieldName] = value;
+        }
+      }
+
+      formattedUpdates.push({
+        id: update.id,
+        fields: formattedFields
+      });
+    }
+
+    const base = this.getBase(baseId);
+    const updatedRecords = await base(tableName).update(
+      formattedUpdates.map(u => ({ id: u.id, fields: u.fields as FieldSet }))
+    );
+
+    return updatedRecords.map(record => ({
+      id: record.id,
+      fields: record.fields as RecordFields,
+      createdTime: record._rawJson.createdTime
+    }));
+  }
+
+  /**
+   * Batch delete records (up to 10 at a time per Airtable's API limit)
+   */
+  async batchDeleteRecords(tableName: string, recordIds: string[], baseId?: string): Promise<string[]> {
+    if (recordIds.length === 0) {
+      return [];
+    }
+
+    if (recordIds.length > 10) {
+      throw new Error('Airtable API supports a maximum of 10 records per batch delete request');
+    }
+
+    const base = this.getBase(baseId);
+    const deletedRecords = await base(tableName).destroy(recordIds);
+
+    return deletedRecords.map(record => record.id);
   }
 }

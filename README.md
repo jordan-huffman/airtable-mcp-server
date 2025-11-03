@@ -24,7 +24,9 @@ A robust Model Context Protocol (MCP) server for Airtable that properly handles 
 - **Automatic Type Conversion**: Automatically converts values to the correct format based on field type
 - **Validation**: Validates field values against schema (e.g., validates select options)
 - **Flexible Querying**: Support for filtering, sorting, views, and field selection
-- **Schema Management**: Define table schemas for enhanced type safety
+- **Schema Management**: Auto-fetch table schemas from Airtable Metadata API or define manually
+- **Batch Operations**: Efficiently create, update, or delete up to 10 records per request
+- **Discovery Tools**: List all accessible bases and tables with metadata
 
 ## Installation
 
@@ -131,7 +133,64 @@ If you primarily work with one base:
 
 ## Available Tools
 
-### 1. `airtable_list_records`
+### 1. `airtable_list_bases`
+
+List all Airtable bases accessible with your Personal Access Token.
+
+**Parameters**: None
+
+**Example Response**:
+```json
+{
+  "count": 3,
+  "bases": [
+    {
+      "id": "appXXXXXXXXXXXXXX",
+      "name": "My Project",
+      "permissionLevel": "create"
+    }
+  ]
+}
+```
+
+### 2. `airtable_list_tables`
+
+List all tables in an Airtable base.
+
+**Parameters**:
+- `baseId` (optional): Airtable base ID. If not provided, uses the default base from configuration.
+
+**Example Response**:
+```json
+{
+  "count": 5,
+  "tables": [
+    {
+      "id": "tblXXXXXXXXXXXXXX",
+      "name": "Contacts",
+      "description": "Customer contact information",
+      "primaryFieldId": "fldXXXXXXXXXXXXXX"
+    }
+  ]
+}
+```
+
+### 3. `airtable_get_table_schema`
+
+Get the complete schema for a table including all field definitions, types, and options. Auto-fetches from Airtable Metadata API.
+
+**Parameters**:
+- `baseId` (optional): Airtable base ID
+- `table` (required): Table name
+
+**Example**:
+```json
+{
+  "table": "Tasks"
+}
+```
+
+### 4. `airtable_list_records`
 
 List records from a table with optional filtering and sorting.
 
@@ -153,7 +212,7 @@ List records from a table with optional filtering and sorting.
 }
 ```
 
-### 2. `airtable_get_record`
+### 5. `airtable_get_record`
 
 Get a specific record by ID.
 
@@ -161,7 +220,7 @@ Get a specific record by ID.
 - `table` (required): Table name
 - `recordId` (required): Record ID
 
-### 3. `airtable_create_record`
+### 6. `airtable_create_record`
 
 Create a new record with automatic field type conversion.
 
@@ -183,7 +242,7 @@ Create a new record with automatic field type conversion.
 }
 ```
 
-### 4. `airtable_update_record`
+### 7. `airtable_update_record`
 
 Update an existing record.
 
@@ -192,7 +251,7 @@ Update an existing record.
 - `recordId` (required): Record ID
 - `fields` (required): Object with field values to update
 
-### 5. `airtable_delete_record`
+### 8. `airtable_delete_record`
 
 Delete a record.
 
@@ -200,7 +259,7 @@ Delete a record.
 - `table` (required): Table name
 - `recordId` (required): Record ID
 
-### 6. `airtable_set_table_schema`
+### 9. `airtable_set_table_schema`
 
 Define the schema for a table to enable proper field type handling. This is optional but recommended for better type safety and validation.
 
@@ -240,6 +299,92 @@ Define the schema for a table to enable proper field type handling. This is opti
       "name": "Completed",
       "type": "checkbox"
     }
+  ]
+}
+```
+
+### 10. `airtable_batch_create_records`
+
+Create multiple records at once (up to 10 per request). Much more efficient than creating records individually.
+
+**Parameters**:
+- `baseId` (optional): Airtable base ID
+- `table` (required): Table name
+- `records` (required): Array of record objects (max 10)
+
+**Example**:
+```json
+{
+  "table": "Tasks",
+  "records": [
+    {
+      "Name": "Task 1",
+      "Status": "To Do",
+      "Priority": 3
+    },
+    {
+      "Name": "Task 2",
+      "Status": "In Progress",
+      "Priority": 5
+    },
+    {
+      "Name": "Task 3",
+      "Status": "To Do",
+      "Priority": 1
+    }
+  ]
+}
+```
+
+### 11. `airtable_batch_update_records`
+
+Update multiple records at once (up to 10 per request). Much more efficient than updating records individually.
+
+**Parameters**:
+- `baseId` (optional): Airtable base ID
+- `table` (required): Table name
+- `updates` (required): Array of update objects with `id` and `fields` (max 10)
+
+**Example**:
+```json
+{
+  "table": "Tasks",
+  "updates": [
+    {
+      "id": "recXXXXXXXXXXXXXX",
+      "fields": {
+        "Status": "Completed",
+        "Completed": true
+      }
+    },
+    {
+      "id": "recYYYYYYYYYYYYYY",
+      "fields": {
+        "Status": "In Progress",
+        "Priority": 5
+      }
+    }
+  ]
+}
+```
+
+### 12. `airtable_batch_delete_records`
+
+Delete multiple records at once (up to 10 per request). Much more efficient than deleting records individually.
+
+**Parameters**:
+- `baseId` (optional): Airtable base ID
+- `table` (required): Table name
+- `recordIds` (required): Array of record IDs to delete (max 10)
+
+**Example**:
+```json
+{
+  "table": "Tasks",
+  "recordIds": [
+    "recXXXXXXXXXXXXXX",
+    "recYYYYYYYYYYYYYY",
+    "recZZZZZZZZZZZZZZ"
   ]
 }
 ```

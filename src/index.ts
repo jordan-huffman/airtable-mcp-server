@@ -33,7 +33,12 @@ import {
   setTableSchemaSchema,
   queryByAgeRangeSchema,
   queryMultipleSelectSchema,
-  smartQuerySchema
+  smartQuerySchema,
+  listTablesSchema,
+  getTableSchemaSchema,
+  batchCreateRecordsSchema,
+  batchUpdateRecordsSchema,
+  batchDeleteRecordsSchema
 } from './validation/tool-schemas.js';
 import {
   ValidationError,
@@ -171,6 +176,38 @@ const tools: Tool[] = [
       type: 'object',
       properties: {},
       required: []
+    }
+  },
+  {
+    name: 'airtable_list_tables',
+    description: 'List all tables in an Airtable base. Returns table names, IDs, and descriptions.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        baseId: {
+          type: 'string',
+          description: 'Airtable base ID (starts with "app"). REQUIRED: Use airtable_list_bases tool first to see available bases and get their IDs.'
+        }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'airtable_get_table_schema',
+    description: 'Get the complete schema for a table including all field definitions, types, and options. Auto-fetches from Airtable Metadata API and caches the result.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        baseId: {
+          type: 'string',
+          description: 'Airtable base ID (starts with "app"). REQUIRED: Use airtable_list_bases tool first to see available bases and get their IDs.'
+        },
+        table: {
+          type: 'string',
+          description: 'Name of the table'
+        }
+      },
+      required: ['table']
     }
   },
   {
@@ -591,6 +628,100 @@ const tools: Tool[] = [
       },
       required: ['table', 'conditions']
     }
+  },
+  {
+    name: 'airtable_batch_create_records',
+    description: 'Create multiple records at once (up to 10 per request). More efficient than creating records one at a time. Automatically handles field type conversions.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        baseId: {
+          type: 'string',
+          description: 'Airtable base ID (starts with "app"). REQUIRED: Use airtable_list_bases tool first to see available bases and get their IDs.'
+        },
+        table: {
+          type: 'string',
+          description: 'Name of the table'
+        },
+        records: {
+          type: 'array',
+          items: {
+            type: 'object',
+            description: 'Field values for each record. Values will be automatically converted based on field type.'
+          },
+          description: 'Array of records to create (max 10)',
+          minItems: 1,
+          maxItems: 10
+        }
+      },
+      required: ['table', 'records']
+    }
+  },
+  {
+    name: 'airtable_batch_update_records',
+    description: 'Update multiple records at once (up to 10 per request). More efficient than updating records one at a time. Automatically handles field type conversions.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        baseId: {
+          type: 'string',
+          description: 'Airtable base ID (starts with "app"). REQUIRED: Use airtable_list_bases tool first to see available bases and get their IDs.'
+        },
+        table: {
+          type: 'string',
+          description: 'Name of the table'
+        },
+        updates: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'Record ID to update'
+              },
+              fields: {
+                type: 'object',
+                description: 'Field values to update. Values will be automatically converted based on field type.'
+              }
+            },
+            required: ['id', 'fields']
+          },
+          description: 'Array of updates to apply (max 10)',
+          minItems: 1,
+          maxItems: 10
+        }
+      },
+      required: ['table', 'updates']
+    }
+  },
+  {
+    name: 'airtable_batch_delete_records',
+    description: 'Delete multiple records at once (up to 10 per request). More efficient than deleting records one at a time.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        baseId: {
+          type: 'string',
+          description: 'Airtable base ID (starts with "app"). REQUIRED: Use airtable_list_bases tool first to see available bases and get their IDs.'
+        },
+        table: {
+          type: 'string',
+          description: 'Name of the table'
+        },
+        recordIds: {
+          type: 'array',
+          items: {
+            type: 'string',
+            description: 'Record ID to delete'
+          },
+          description: 'Array of record IDs to delete (max 10)',
+          minItems: 1,
+          maxItems: 10
+        }
+      },
+      required: ['table', 'recordIds']
+    }
   }
 ];
 
@@ -646,6 +777,35 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 count: bases.length,
                 bases
               }, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'airtable_list_tables': {
+        const params = validateToolArgs(listTablesSchema, args);
+        const tables = await client.listTables(params.baseId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                count: tables.length,
+                tables
+              }, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'airtable_get_table_schema': {
+        const params = validateToolArgs(getTableSchemaSchema, args);
+        const schema = await client.getTableSchemaFromAPI(params.table, params.baseId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(schema, null, 2)
             }
           ]
         };
@@ -929,6 +1089,57 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 },
                 recordCount: records.length,
                 records
+              }, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'airtable_batch_create_records': {
+        const params = validateToolArgs(batchCreateRecordsSchema, args);
+        const createdRecords = await client.batchCreateRecords(params.table, params.records, params.baseId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                recordCount: createdRecords.length,
+                records: createdRecords
+              }, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'airtable_batch_update_records': {
+        const params = validateToolArgs(batchUpdateRecordsSchema, args);
+        const updatedRecords = await client.batchUpdateRecords(params.table, params.updates, params.baseId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                recordCount: updatedRecords.length,
+                records: updatedRecords
+              }, null, 2)
+            }
+          ]
+        };
+      }
+
+      case 'airtable_batch_delete_records': {
+        const params = validateToolArgs(batchDeleteRecordsSchema, args);
+        const deletedIds = await client.batchDeleteRecords(params.table, params.recordIds, params.baseId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({
+                success: true,
+                deletedCount: deletedIds.length,
+                deletedIds
               }, null, 2)
             }
           ]
